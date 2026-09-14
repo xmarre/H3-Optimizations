@@ -2,11 +2,20 @@ import asyncio
 from types import SimpleNamespace
 
 from h3_optimizations.comfy_deploy_compat import _build_asset_manager_bridge
+from h3_optimizations.comfy_deploy_prompt_hook import register
 
 
 class _DynPrompt:
     def get_node(self, unique_id):
         return {"class_type": f"Class:{unique_id}"}
+
+
+class _PromptServer:
+    def __init__(self):
+        self.handlers = []
+
+    def add_on_prompt_handler(self, handler):
+        self.handlers.append(handler)
 
 
 async def _legacy_wrapper(
@@ -117,3 +126,12 @@ def test_bridge_does_not_fabricate_completion_after_core_error():
         raise AssertionError("expected core failure")
 
     assert handled == []
+
+
+def test_prompt_hook_registers_once_and_preserves_data():
+    server = _PromptServer()
+    register(server)
+    register(server)
+    assert len(server.handlers) == 1
+    data = {"prompt": {}}
+    assert server.handlers[0](data) is data
