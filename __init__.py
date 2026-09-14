@@ -47,6 +47,13 @@ def _load_h3_package():
 
 _h3_optimizations = _load_h3_package()
 
+# Temporary runtime-only compatibility bridge for the currently installed
+# Comfy Deploy execute wrapper. It is fail-closed and leaves unrelated/fixed
+# runtime shapes untouched; no ComfyUI or Comfy Deploy source file is changed.
+from h3_optimizations.comfy_deploy_compat import install_comfy_deploy_execute_compat
+
+install_comfy_deploy_execute_compat()
+
 from h3_optimizations.public_nodes import H3OptimizationsExtension
 
 
